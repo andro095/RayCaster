@@ -10,11 +10,27 @@ from math import cos, sin, pi
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    pygame.init()
-    disp = pygame.display.set_mode((1000, 500))
-    cast = MyRender(disp)
+    txts = {
+        '1': pygame.image.load('./textures/brick.jpg'),
+        '2': pygame.image.load('./textures/clear.jpg'),
+        '3': pygame.image.load('./textures/dark.jpg'),
+        '4': pygame.image.load('./textures/stone.jpg'),
+        '5': pygame.image.load('./textures/white.jpg')
+    }
 
-    cast.glsColor((128, 0, 0))
+
+    pygame.init()
+    disp = pygame.display.set_mode((1000, 500), pygame.DOUBLEBUF | pygame.HWACCEL)
+    disp.set_alpha(None)
+    tkei = pygame.time.Clock()
+    ltr = pygame.font.SysFont("Arial", 30)
+
+    def incF():
+        fs = str(int(tkei.get_fps()))
+        fs = ltr.render(fs, 1, pygame.Color("white"))
+        return fs
+
+    cast = MyRender(disp, txts)
     cast.glload_map('chzu.txt')
 
     flag = True
@@ -23,30 +39,51 @@ if __name__ == '__main__':
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 flag = False
+
+            nX = cast.x
+            nY = cast.y
+
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_ESCAPE:
                     isRunning = False
                 elif ev.key == pygame.K_w:
-                    cast.x += cos(cast.ag * pi / 180) * cast.stpsize
-                    cast.y += sin(cast.ag * pi / 180) * cast.stpsize
+                    nX += cos(cast.ag * pi / 180) * cast.stpsize
+                    nY += sin(cast.ag * pi / 180) * cast.stpsize
                 elif ev.key == pygame.K_s:
-                    cast.x -= cos(cast.ag * pi / 180) * cast.stpsize
-                    cast.y -= sin(cast.ag * pi / 180) * cast.stpsize
+                    nX -= cos(cast.ag * pi / 180) * cast.stpsize
+                    nY -= sin(cast.ag * pi / 180) * cast.stpsize
                 elif ev.key == pygame.K_a:
-                    cast.x -= cos((cast.ag + 90) * pi / 180) * cast.stpsize
-                    cast.y -= sin((cast.ag + 90) * pi / 180) * cast.stpsize
+                    nX -= cos((cast.ag + 90) * pi / 180) * cast.stpsize
+                    nY -= sin((cast.ag + 90) * pi / 180) * cast.stpsize
                 elif ev.key == pygame.K_d:
-                    cast.x += cos((cast.ag + 90) * pi / 180) * cast.stpsize
-                    cast.y += sin((cast.ag + 90) * pi / 180) * cast.stpsize
+                    nX += cos((cast.ag + 90) * pi / 180) * cast.stpsize
+                    nY += sin((cast.ag + 90) * pi / 180) * cast.stpsize
                 elif ev.key == pygame.K_LEFT:
                     cast.ag -= 5
                 elif ev.key == pygame.K_RIGHT:
                     cast.ag += 5
 
-        disp.fill((64, 64, 64))
+                a = int(nX / cast.bksize)
+                b = int(nY / cast.bksize)
+
+                if cast.chzu[b][a] == ' ':
+                    cast.x = nX
+                    cast.y = nY
+
+        disp.fill(pygame.Color("gray"))
+
+        disp.fill(pygame.Color("saddlebrown"), (int(cast.width / 2), 0, int(cast.width / 2), int(cast.height / 2)))
+
+        disp.fill(pygame.Color("dimgray"), (int(cast.width / 2), int(cast.height / 2), int(cast.width / 2), int(cast.height / 2)))
+
         cast.glrender()
 
-        pygame.display.flip()
+        disp.fill(pygame.Color("black"), (0, 0, 30, 30))
+
+        disp.blit(incF(), (0,0))
+        tkei.tick(30)
+
+        pygame.display.update()
     pygame.quit()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
