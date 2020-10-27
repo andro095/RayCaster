@@ -33,6 +33,8 @@ if __name__ == '__main__':
     cast = MyRender(disp, txts)
     cast.glload_map('chzu.txt')
 
+    cast.glload_map('chzu.txt')
+
     flag = True
 
     while flag:
@@ -70,13 +72,15 @@ if __name__ == '__main__':
                     cast.x = nX
                     cast.y = nY
 
-        disp.fill(pygame.Color("gray"))
+        disp.blit(pygame.image.load("./backgrounds/minecraftbg.png"), (0, 0))
 
-        disp.fill(pygame.Color("saddlebrown"), (int(cast.width / 2), 0, int(cast.width / 2), int(cast.height / 2)))
+        # disp.fill(pygame.Color("gray"))
 
-        disp.fill(pygame.Color("dimgray"), (int(cast.width / 2), int(cast.height / 2), int(cast.width / 2), int(cast.height / 2)))
+        # disp.fill(pygame.Color("saddlebrown"), (int(cast.width / 2), 0, int(cast.width / 2), int(cast.height / 2)))
 
-        cast.glrender()
+        # disp.fill(pygame.Color("dimgray"), (int(cast.width / 2), int(cast.height / 2), int(cast.width / 2), int(cast.height / 2)))
+
+        # cast.glrender()
 
         disp.fill(pygame.Color("black"), (0, 0, 30, 30))
 
