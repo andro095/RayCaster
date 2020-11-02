@@ -1,15 +1,16 @@
 from render import *
 import pygame
 from math import cos, sin, pi
+
 # This is a sample Python script.
 
 # Press Mayús+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
 
-
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+
     txts = {
         '1': pygame.image.load('./textures/brick.jpg'),
         '2': pygame.image.load('./textures/clear.jpg'),
@@ -18,26 +19,73 @@ if __name__ == '__main__':
         '5': pygame.image.load('./textures/white.jpg')
     }
 
+    enemies = [{"x": 80,
+                "y": 300,
+                "texture": pygame.image.load('./sprites/zombie.png')},
+
+               {"x": 270,
+                "y": 280,
+                "texture": pygame.image.load('./sprites/crepper.png')},
+
+               {"x": 320,
+                "y": 420,
+                "texture": pygame.image.load('./sprites/herobrine.png')}
+               ]
 
     pygame.init()
     disp = pygame.display.set_mode((1000, 500), pygame.DOUBLEBUF | pygame.HWACCEL)
     disp.set_alpha(None)
     tkei = pygame.time.Clock()
-    ltr = pygame.font.SysFont("Arial", 30)
+    ltr = pygame.font.Font("./fonts/Raleway-Medium.ttf", 30)
+    pygame.mixer.music.load("./music/MinecraftMusicMenu.mp3")
+    pygame.mixer.music.play(-1)
+
 
     def incF():
         fs = str(int(tkei.get_fps()))
         fs = ltr.render(fs, 1, pygame.Color("white"))
         return fs
 
-    cast = MyRender(disp, txts)
+
+    cast = MyRender(disp, txts, enemies)
     cast.glload_map('chzu.txt')
 
-    cast.glload_map('chzu.txt')
+    button = pygame.image.load("./UIElements/MinecraftButton.png")
+    mysound = pygame.mixer.Sound("./music/MinecraftMenuButtonSoundEffect.wav")
+
+    tabIndex = -1
+    buttonPressed = False
+
+    isPrincipalMenu = True
+    isPaused = True
 
     flag = True
+    
+    def createButton(buttonInfo):
+        disp.blit(button, (buttonInfo['x'], buttonInfo['y']))
+        disp.blit(ltr.render(buttonInfo['text'], 1, pygame.Color("white")), (
+            int(buttonInfo['x'] + (button.get_width() / 2) - (ltr.size(buttonInfo['text'])[0] / 2)),
+            int(buttonInfo['y'] + (button.get_height() / 2) - (ltr.size(buttonInfo['text'])[1] / 2))))
+
+
+    menubuttons = [
+        {
+            "x": int((cast.width / 4) - (button.get_width() / 2)),
+            "y": 240,
+            "text": "Iniciar Juego",
+            "tabIndex": 0
+        },
+        {
+            "x": int((cast.width * 3 / 4) - (button.get_width() / 2)),
+            "y": 240,
+            "text": "Salir",
+            "tabIndex": 1
+        },
+    ]
 
     while flag:
+        mpos = pygame.mouse.get_pos()
+
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 flag = False
@@ -45,25 +93,39 @@ if __name__ == '__main__':
             nX = cast.x
             nY = cast.y
 
+            if isPrincipalMenu or isPaused:
+                if ev.type == pygame.MOUSEBUTTONDOWN:
+                    for but in menubuttons:
+                        if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height():
+                            mysound.play()
+                            tabIndex = but['tabIndex']
+                            buttonPressed = True
+
             if ev.type == pygame.KEYDOWN:
-                if ev.key == pygame.K_ESCAPE:
-                    isRunning = False
-                elif ev.key == pygame.K_w:
-                    nX += cos(cast.ag * pi / 180) * cast.stpsize
-                    nY += sin(cast.ag * pi / 180) * cast.stpsize
-                elif ev.key == pygame.K_s:
-                    nX -= cos(cast.ag * pi / 180) * cast.stpsize
-                    nY -= sin(cast.ag * pi / 180) * cast.stpsize
-                elif ev.key == pygame.K_a:
-                    nX -= cos((cast.ag + 90) * pi / 180) * cast.stpsize
-                    nY -= sin((cast.ag + 90) * pi / 180) * cast.stpsize
-                elif ev.key == pygame.K_d:
-                    nX += cos((cast.ag + 90) * pi / 180) * cast.stpsize
-                    nY += sin((cast.ag + 90) * pi / 180) * cast.stpsize
-                elif ev.key == pygame.K_LEFT:
-                    cast.ag -= 5
-                elif ev.key == pygame.K_RIGHT:
-                    cast.ag += 5
+                if isPaused or isPrincipalMenu:
+                    if ev.key == pygame.K_TAB:
+                        tabIndex = (tabIndex + 1) % 2
+                    elif ev.key == pygame.K_RETURN or ev.key == pygame.K_KP_ENTER:
+                        if tabIndex != -1:
+                            mysound.play()
+                            buttonPressed = True
+                else:
+                    if ev.key == pygame.K_w:
+                        nX += cos(cast.ag * pi / 180) * cast.stpsize
+                        nY += sin(cast.ag * pi / 180) * cast.stpsize
+                    elif ev.key == pygame.K_s:
+                        nX -= cos(cast.ag * pi / 180) * cast.stpsize
+                        nY -= sin(cast.ag * pi / 180) * cast.stpsize
+                    elif ev.key == pygame.K_a:
+                        nX -= cos((cast.ag + 90) * pi / 180) * cast.stpsize
+                        nY -= sin((cast.ag + 90) * pi / 180) * cast.stpsize
+                    elif ev.key == pygame.K_d:
+                        nX += cos((cast.ag + 90) * pi / 180) * cast.stpsize
+                        nY += sin((cast.ag + 90) * pi / 180) * cast.stpsize
+                    elif ev.key == pygame.K_LEFT:
+                        cast.ag -= 5
+                    elif ev.key == pygame.K_RIGHT:
+                        cast.ag += 5
 
                 a = int(nX / cast.bksize)
                 b = int(nY / cast.bksize)
@@ -72,20 +134,44 @@ if __name__ == '__main__':
                     cast.x = nX
                     cast.y = nY
 
-        disp.blit(pygame.image.load("./backgrounds/minecraftbg.png"), (0, 0))
+        if isPrincipalMenu:
+            if buttonPressed:
+                if tabIndex == 0:
+                    isPrincipalMenu = False
+                    isPaused = False
+                    pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
+                    pygame.mixer.music.play(-1)
+                elif tabIndex == 1:
+                    flag = False
+                buttonPressed = False
 
-        # disp.fill(pygame.Color("gray"))
+            disp.blit(pygame.image.load("./backgrounds/minecraftbg.png"), (0, 0))
 
-        # disp.fill(pygame.Color("saddlebrown"), (int(cast.width / 2), 0, int(cast.width / 2), int(cast.height / 2)))
+            title = pygame.image.load("./UIElements/MinecraftTitle.png")
+            disp.blit(title, (int((cast.width / 2) - (title.get_width() / 2)), 30))
 
-        # disp.fill(pygame.Color("dimgray"), (int(cast.width / 2), int(cast.height / 2), int(cast.width / 2), int(cast.height / 2)))
+            for but in menubuttons:
+                if (but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height()) or tabIndex == but['tabIndex']:
+                    disp.fill(pygame.Color("yellow"), (
+                        int(but['x'] - 3), int(but['y'] - 3), int(button.get_width() + 6), int(button.get_height() + 6)))
+                    createButton(but)
+                    if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height():
+                        tabIndex = -1
+                else:
+                    createButton(but)
+        else:
+            disp.blit(pygame.image.load("./backgrounds/grass.png"), (0, 0))
 
-        # cast.glrender()
+            disp.blit(pygame.image.load("./backgrounds/sky.png"), (int(cast.width / 2), 0))
 
-        disp.fill(pygame.Color("black"), (0, 0, 30, 30))
+            disp.blit(pygame.image.load("./backgrounds/grassfloor.png"), (int(cast.width / 2), int(cast.height / 2)))
 
-        disp.blit(incF(), (0,0))
-        tkei.tick(30)
+            cast.glrender()
+
+            disp.fill(pygame.Color("black"), (0, 0, 30, 30))
+
+            disp.blit(incF(), (0, 0))
+            tkei.tick(30)
 
         pygame.display.update()
     pygame.quit()
