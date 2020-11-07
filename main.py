@@ -2,13 +2,6 @@ from render import *
 import pygame
 from math import cos, sin, pi
 
-# This is a sample Python script.
-
-# Press Mayús+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     txts = {
@@ -27,7 +20,7 @@ if __name__ == '__main__':
                 "y": 280,
                 "texture": pygame.image.load('./sprites/crepper.png')},
 
-               {"x": 320,
+               {"x": 420,
                 "y": 420,
                 "texture": pygame.image.load('./sprites/herobrine.png')}
                ]
@@ -48,7 +41,6 @@ if __name__ == '__main__':
 
 
     cast = MyRender(disp, txts, enemies)
-    cast.glload_map('chzu.txt')
 
     button = pygame.image.load("./UIElements/MinecraftButton.png")
     mysound = pygame.mixer.Sound("./music/MinecraftMenuButtonSoundEffect.wav")
@@ -60,7 +52,8 @@ if __name__ == '__main__':
     isPaused = True
 
     flag = True
-    
+
+
     def createButton(buttonInfo):
         disp.blit(button, (buttonInfo['x'], buttonInfo['y']))
         disp.blit(ltr.render(buttonInfo['text'], 1, pygame.Color("white")), (
@@ -70,16 +63,28 @@ if __name__ == '__main__':
 
     menubuttons = [
         {
-            "x": int((cast.width / 4) - (button.get_width() / 2)),
-            "y": 240,
-            "text": "Iniciar Juego",
+            "x": int((cast.width / 2) - (button.get_width() / 2)),
+            "y": 120,
+            "text": "Nivel 1",
             "tabIndex": 0
         },
         {
-            "x": int((cast.width * 3 / 4) - (button.get_width() / 2)),
-            "y": 240,
-            "text": "Salir",
+            "x": int((cast.width / 2) - (button.get_width() / 2)),
+            "y": 200,
+            "text": "Nivel 2",
             "tabIndex": 1
+        },
+        {
+            "x": int((cast.width / 2) - (button.get_width() / 2)),
+            "y": 280,
+            "text": "Nivel 3",
+            "tabIndex": 2
+        },
+        {
+            "x": int((cast.width / 2) - (button.get_width() / 2)),
+            "y": 360,
+            "text": "Salir",
+            "tabIndex": 3
         },
     ]
 
@@ -90,27 +95,31 @@ if __name__ == '__main__':
             if ev.type == pygame.QUIT:
                 flag = False
 
-            nX = cast.x
-            nY = cast.y
-
             if isPrincipalMenu or isPaused:
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     for but in menubuttons:
-                        if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height():
+                        if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but[
+                            'y'] + button.get_height():
                             mysound.play()
                             tabIndex = but['tabIndex']
                             buttonPressed = True
 
             if ev.type == pygame.KEYDOWN:
-                if isPaused or isPrincipalMenu:
+                if isPaused:
                     if ev.key == pygame.K_TAB:
-                        tabIndex = (tabIndex + 1) % 2
+                        tabIndex = (tabIndex + 1) % 4
                     elif ev.key == pygame.K_RETURN or ev.key == pygame.K_KP_ENTER:
                         if tabIndex != -1:
                             mysound.play()
                             buttonPressed = True
+                    elif ev.key == pygame.K_ESCAPE:
+                        isPaused = False
                 else:
-                    if ev.key == pygame.K_w:
+                    nX = cast.x
+                    nY = cast.y
+                    if ev.key == pygame.K_ESCAPE:
+                        isPaused = True
+                    elif ev.key == pygame.K_w:
                         nX += cos(cast.ag * pi / 180) * cast.stpsize
                         nY += sin(cast.ag * pi / 180) * cast.stpsize
                     elif ev.key == pygame.K_s:
@@ -127,12 +136,12 @@ if __name__ == '__main__':
                     elif ev.key == pygame.K_RIGHT:
                         cast.ag += 5
 
-                a = int(nX / cast.bksize)
-                b = int(nY / cast.bksize)
+                    a = int(nX / cast.bksize)
+                    b = int(nY / cast.bksize)
 
-                if cast.chzu[b][a] == ' ':
-                    cast.x = nX
-                    cast.y = nY
+                    if cast.chzu[b][a] == ' ':
+                        cast.x = nX
+                        cast.y = nY
 
         if isPrincipalMenu:
             if buttonPressed:
@@ -141,7 +150,20 @@ if __name__ == '__main__':
                     isPaused = False
                     pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
                     pygame.mixer.music.play(-1)
+                    cast.glload_map('./maps/chzu.txt')
                 elif tabIndex == 1:
+                    isPrincipalMenu = False
+                    isPaused = False
+                    pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
+                    pygame.mixer.music.play(-1)
+                    cast.glload_map('./maps/chzu2.txt')
+                elif tabIndex == 2:
+                    isPrincipalMenu = False
+                    isPaused = False
+                    pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
+                    pygame.mixer.music.play(-1)
+                    cast.glload_map('./maps/chzu3.txt')
+                elif tabIndex == 3:
                     flag = False
                 buttonPressed = False
 
@@ -151,11 +173,14 @@ if __name__ == '__main__':
             disp.blit(title, (int((cast.width / 2) - (title.get_width() / 2)), 30))
 
             for but in menubuttons:
-                if (but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height()) or tabIndex == but['tabIndex']:
+                if (but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but[
+                    'y'] + button.get_height()) or tabIndex == but['tabIndex']:
                     disp.fill(pygame.Color("yellow"), (
-                        int(but['x'] - 3), int(but['y'] - 3), int(button.get_width() + 6), int(button.get_height() + 6)))
+                        int(but['x'] - 3), int(but['y'] - 3), int(button.get_width() + 6),
+                        int(button.get_height() + 6)))
                     createButton(but)
-                    if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height():
+                    if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but[
+                        'y'] + button.get_height():
                         tabIndex = -1
                 else:
                     createButton(but)
@@ -172,6 +197,46 @@ if __name__ == '__main__':
 
             disp.blit(incF(), (0, 0))
             tkei.tick(30)
+
+            if isPaused:
+                s = pygame.Surface((cast.width, cast.height))
+                s.set_alpha(192)
+                s.fill((0, 0, 0))
+                disp.blit(s, (0, 0))
+
+                if buttonPressed:
+                    if tabIndex == 0:
+                        isPaused = False
+                        pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
+                        pygame.mixer.music.play(-1)
+                        cast.glload_map('./maps/chzu.txt')
+                        cast.glrender()
+                    elif tabIndex == 1:
+                        isPaused = False
+                        pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
+                        pygame.mixer.music.play(-1)
+                        cast.glload_map('./maps/chzu2.txt')
+                        cast.glrender()
+                    elif tabIndex == 2:
+                        isPaused = False
+                        pygame.mixer.music.load("./music/MinecraftBackgroundMusic.mp3")
+                        pygame.mixer.music.play(-1)
+                        cast.glload_map('./maps/chzu3.txt')
+                        cast.glrender()
+                    elif tabIndex == 3:
+                        isPrincipalMenu = True
+                    buttonPressed = False
+
+                for but in menubuttons:
+                    if (but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height()) or tabIndex == but['tabIndex']:
+                        disp.fill(pygame.Color("yellow"), (
+                            int(but['x'] - 3), int(but['y'] - 3), int(button.get_width() + 6),
+                            int(button.get_height() + 6)))
+                        createButton(but)
+                        if but['x'] < mpos[0] < but['x'] + button.get_width() and but['y'] < mpos[1] < but['y'] + button.get_height():
+                            tabIndex = -1
+                    else:
+                        createButton(but)
 
         pygame.display.update()
     pygame.quit()

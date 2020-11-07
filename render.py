@@ -26,6 +26,11 @@ class MyRender(object):
         self.fov = 60
 
     def glload_map(self, fname):
+        self.x = 75
+        self.y = 175
+        self.ag = 30
+        if self.chzu != []:
+            self.chzu = []
         f = open(fname).readlines()
         for l in f:
             self.chzu.append(list(l))
@@ -44,7 +49,9 @@ class MyRender(object):
         bunW = self.width / 2
         bunH = self.height / 2
 
-        sAng = atan2(spt['y'] - self.y, spt['x'] - self.x)
+        sAng = atan2(spt['y'] - self.y, spt['x'] - self.x) * 180 / pi
+        sAng %= 360
+        sAng = degtorad(sAng)
 
         sOku = ((self.x - spt['x']) ** 2 + (self.y - spt['y']) ** 2) ** 0.5
 
@@ -53,7 +60,7 @@ class MyRender(object):
         sW = sH * art
 
         fovR = degtorad(self.fov)
-        angR = degtorad(self.ag)
+        angR = degtorad(self.ag % 360)
 
         sX = int((self.width * 3 / 4) + ((sAng - angR) * bunW / fovR) - (sW/2))
         sY = int(bunH - (sH / 2))
